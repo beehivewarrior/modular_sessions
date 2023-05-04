@@ -70,7 +70,7 @@ class SessionsMiddleware:
             session = None
 
         # run renewal if needed/requested
-        if self.renew_on_access:
+        if self.renew_on_access and not replace_frontend_session:
             try:
                 # try to renew the session ID with the backend
                 await self.backend.renew(session_id, self.renewal_ttl)

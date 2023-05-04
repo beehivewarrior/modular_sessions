@@ -12,8 +12,9 @@ class SessionCookieParameters(BaseModel):
     Session cookie.
     """
 
-    domain: Optional[str] = None
+    path = "/"
     max_age: int = Field(3600, alias="max-age", title="max-age")
+    same_site: str = Field("lax", alias="same-site")
 
 
 class UserSession(BaseModel):

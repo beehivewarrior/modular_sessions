@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "modular-sessions"
-version = "0.1.3"
+version = "0.1.4"
 description = ""
 repository = "https://github.com/beehivewarrior/modular_sessions/"
 authors = ["Jordan Bigelow <jordan@jordanbigelow.com>"]
