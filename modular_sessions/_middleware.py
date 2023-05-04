@@ -90,6 +90,11 @@ class SessionsMiddleware:
                     headers = MutableHeaders(scope=message)
                     self.frontend.open_session(s_id, headers)
 
+                elif replace_frontend_session:
+                    s_id = self.backend.generate_session_key()
+                    headers = MutableHeaders(scope=message)
+                    self.frontend.open_session(s_id, headers)
+
             await send(message)
 
         await self.app(scope, receive, response_wrapper)
