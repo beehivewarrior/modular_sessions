@@ -89,7 +89,7 @@ class CookieSession(SessionFrontendAbstract[str]):
         cookie: BaseCookie = SimpleCookie()
         cookie[self.model.name] = str(self.serializer.dumps(session_key))
 
-        for k, v in self.__cookie_params.dict().items():
+        for k, v in self.__cookie_params.dict(by_alias=True).items():
             cookie[self.model.name][k] = str(v)
 
         cookie_val = cookie.output(header="").strip()

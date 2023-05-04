@@ -4,7 +4,7 @@ Schemas used for sessions
 
 from typing import Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class SessionCookieParameters(BaseModel):
@@ -13,7 +13,7 @@ class SessionCookieParameters(BaseModel):
     """
 
     domain: Optional[str] = None
-    max_age: int = 3600
+    max_age: int = Field(3600, alias="max-age", title="max-age")
 
 
 class UserSession(BaseModel):
