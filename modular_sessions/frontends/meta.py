@@ -3,9 +3,10 @@ Generics for session frontends.
 """
 
 from abc import ABCMeta, abstractmethod
-from typing import Generic
+from typing import Generic, Type
 
 from fastapi import Request, Response
+from itsdangerous import Signer, Serializer
 from starlette.datastructures import MutableHeaders
 
 from modular_sessions.backends.memory import MemoryBackend
@@ -24,6 +25,22 @@ class SessionFrontendAbstract(Generic[SessionKey], metaclass=ABCMeta):
     def identifier(self) -> str:
         """
         Frontend identifier.
+        """
+        raise NotImplementedError()
+
+    @property
+    @abstractmethod
+    def serializer(self) -> Serializer:
+        """
+        Serializer used to sign session data
+        """
+        raise NotImplementedError()
+
+    @property
+    @abstractmethod
+    def signer(self) -> Type[Signer]:
+        """
+        Data signing class
         """
         raise NotImplementedError()
 

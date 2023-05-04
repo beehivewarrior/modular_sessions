@@ -2,27 +2,24 @@
 Session Frontend that uses cookies.
 """
 
-from http.cookies import BaseCookie, SimpleCookie, Morsel
-from typing import Optional
+from http.cookies import BaseCookie, SimpleCookie
+from typing import Optional, Type
 
 from fastapi import HTTPException, Response
 from fastapi.openapi.models import APIKey, APIKeyIn
-from itsdangerous import BadSignature, SignatureExpired, Signer, URLSafeTimedSerializer
+from itsdangerous import BadSignature, SignatureExpired, Signer, Serializer, URLSafeTimedSerializer
 from starlette.datastructures import MutableHeaders
 from starlette.requests import Request
 
-from modular_sessions.backends.meta import SessionBackendAbstract
 from modular_sessions.errors import InvalidCookie, SessionNotSet
 from modular_sessions.frontends.meta import SessionFrontendAbstract
 from modular_sessions.schemas import SessionCookieParameters
-from modular_sessions.typing import SessionAppendage
 
 
 class CookieSession(SessionFrontendAbstract[str]):
 
-    def __init__(self, *, cookie_name: str, identifier: str, secret_key: Optional[str] = None,
-                 cookie_params: SessionCookieParameters = SessionCookieParameters(), scheme_name: Optional[str] = None,
-                 backend_class: SessionBackendAbstract = None):
+    def __init__(self, *, cookie_name: str, identifier: str, salt: str, secret_key: str,
+                 cookie_params: SessionCookieParameters = SessionCookieParameters(), scheme_name: Optional[str] = None):
         """
         Session Frontend that uses cookies.
 
@@ -31,18 +28,15 @@ class CookieSession(SessionFrontendAbstract[str]):
         :param secret_key: Key used to sign the cookie.
         :param cookie_params: Cookie parameters to always use.
         :param scheme_name: Scheme name.
-        :param backend_class: Backend class.
         """
 
-        self.backend_class = backend_class or self.backend_class
         self.model: APIKey = APIKey(**{"in": APIKeyIn.cookie}, name=cookie_name)
         self.scheme_name = scheme_name or self.__class__.__name__
 
         self.__identifier = identifier
-        self.__secret_key = secret_key or self.backend_class.secret_key
-        self.__serializer = URLSafeTimedSerializer(
-            self.backend_class.secret_key, salt=self.backend_class.signer_salt, signer=Signer
-        )
+        self.__salt = salt
+        self.__secret_key = secret_key
+        self.__serializer = None
         self.__cookie_params = cookie_params.copy(deep=True)
 
     def __call__(self, request: Request) -> str:
@@ -56,8 +50,8 @@ class CookieSession(SessionFrontendAbstract[str]):
             raise SessionNotSet() from HTTPException(status_code=401, detail="Session not found.")
 
         try:
-            session_id = self.__serializer.loads(signed_session_id, max_age=self.__cookie_params.max_age,
-                                                 return_timestamp=False)
+            session_id = self.serializer.loads(signed_session_id, max_age=self.__cookie_params.max_age,
+                                               return_timestamp=False)
         except (BadSignature, SignatureExpired):
             raise HTTPException(status_code=401, detail="Invalid session.") from InvalidCookie()
 
@@ -72,6 +66,17 @@ class CookieSession(SessionFrontendAbstract[str]):
 
         return self.__identifier
 
+    @property
+    def serializer(self) -> Serializer:
+        if self.__serializer is None:
+            self.__serializer = URLSafeTimedSerializer(self.__secret_key, salt=self.__salt, signer=self.signer)
+
+        return self.__serializer
+
+    @property
+    def signer(self) -> Type[Signer]:
+        return Signer
+
     def open_session(self, session_key: str, headers: MutableHeaders) -> MutableHeaders:
         """
         Attach a session to a response.
@@ -82,7 +87,7 @@ class CookieSession(SessionFrontendAbstract[str]):
         """
 
         cookie: BaseCookie = SimpleCookie()
-        cookie[self.model.name] = str(self.__serializer.dumps(session_key))
+        cookie[self.model.name] = str(self.serializer.dumps(session_key))
 
         for k, v in self.__cookie_params.dict().items():
             cookie[self.model.name][k] = str(v)

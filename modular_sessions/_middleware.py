@@ -3,7 +3,6 @@ Middleware for sessions management on the API.
 """
 
 import json
-from base64 import b64decode, b64encode
 from typing import Optional, Type
 
 from starlette.datastructures import MutableHeaders
@@ -88,8 +87,6 @@ class SessionsMiddleware:
             if message["type"] == "http.response.start":
                 if scope["session"]:
                     s_id = str(scope["session"]["session_id"])
-                    data = b64encode(s_id.encode("utf-8"))
-                    data = self.frontend.signer.sign(data)
                     headers = MutableHeaders(scope=message)
                     self.frontend.open_session(s_id, headers)
 
