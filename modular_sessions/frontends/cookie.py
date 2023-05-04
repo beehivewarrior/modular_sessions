@@ -50,8 +50,7 @@ class CookieSession(SessionFrontendAbstract[str]):
             raise SessionNotSet() from HTTPException(status_code=401, detail="Session not found.")
 
         try:
-            session_id = self.serializer.loads(signed_session_id, max_age=self.__cookie_params.max_age,
-                                               return_timestamp=False)
+            session_id = self.serializer.loads(signed_session_id, return_timestamp=False)
         except (BadSignature, SignatureExpired):
             raise HTTPException(status_code=401, detail="Invalid session.") from InvalidCookie()
 
