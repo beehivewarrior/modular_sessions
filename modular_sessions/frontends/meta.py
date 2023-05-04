@@ -10,7 +10,7 @@ from itsdangerous import Signer, Serializer
 from starlette.datastructures import MutableHeaders
 
 from modular_sessions.backends.memory import MemoryBackend
-from modular_sessions.typing import SessionKey, SessionAppendage
+from modular_sessions.typing import SessionKey
 
 
 class SessionFrontendAbstract(Generic[SessionKey], metaclass=ABCMeta):

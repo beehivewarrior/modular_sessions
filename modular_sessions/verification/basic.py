@@ -4,15 +4,14 @@ Class to verify the session token.
 Basic verification is done by checking if the session exists in the backend.
 """
 
-from modular_sessions.backends.meta import SessionBackendInterface
 from modular_sessions.schemas import UserSession
-from modular_sessions.typing import SessionModel
+from modular_sessions.typing import SessionModel, BackEndInterface
 from modular_sessions.verification.meta import SessionVerificationInterface
 
 
 class BasicSessionVerification(SessionVerificationInterface[str, UserSession]):
 
-    def __init__(self, *, identifier: str, backend: SessionBackendInterface[str, UserSession]):
+    def __init__(self, *, identifier: str, backend: BackEndInterface[str, UserSession]):
         """
         :param identifier: Identifier for the session.
         :param backend: Session backend.
@@ -21,7 +20,7 @@ class BasicSessionVerification(SessionVerificationInterface[str, UserSession]):
         self._backend = backend
 
     @property
-    def backend(self) -> SessionBackendInterface[str, UserSession]:
+    def backend(self) -> BackEndInterface[str, UserSession]:
         """
         Session backend.
         """

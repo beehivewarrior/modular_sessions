@@ -58,4 +58,7 @@ FrontEndT = TypeVar("FrontEndT", bound=FrontEndInterface)
 VerificationT = TypeVar("VerificationT", bound=VerificationInterface)
 
 
-__all__ = ["EngineType", "SessionKey", "SessionModel", "SessionAppendage", "BackEndT", "FrontEndT", "VerificationT"]
+__all__ = [
+    "EngineType", "SessionKey", "SessionModel", "SessionAppendage",
+    "BackEndInterface", "FrontEndInterface", "VerificationInterface",
+    "BackEndT", "FrontEndT", "VerificationT"]

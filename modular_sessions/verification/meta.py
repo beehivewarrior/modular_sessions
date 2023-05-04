@@ -7,9 +7,8 @@ from typing import Generic
 
 from fastapi import HTTPException, Request
 
-from modular_sessions.backends.meta import SessionBackendInterface
 from modular_sessions.errors import BackendException, FrontendException
-from modular_sessions.typing import SessionKey, SessionModel
+from modular_sessions.typing import SessionKey, SessionModel, BackEndInterface
 
 
 class SessionVerificationInterface(Generic[SessionKey, SessionModel]):
@@ -46,7 +45,7 @@ class SessionVerificationInterface(Generic[SessionKey, SessionModel]):
 
     @property
     @abstractmethod
-    def backend(self) -> SessionBackendInterface[SessionKey, SessionModel]:
+    def backend(self) -> BackEndInterface[SessionKey, SessionModel]:
         """
         Session backend.
         """
