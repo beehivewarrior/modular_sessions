@@ -18,9 +18,11 @@ classifiers = [
 
 [tool.poetry.dependencies]
 python = "^3.10"
-fastapi = "^0"
-itsdangerous = "^2.1.1"
-black = {version = "^23.3.0", optional = true }
+itsdangerous = ">=2.0.1"
+fastapi = ">=0"
+
+[tool.poetry.extras]
+redis = ["aioredis"]
 
 
 [build-system]

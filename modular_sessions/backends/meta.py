@@ -9,7 +9,7 @@ from typing import Generic, Optional
 from modular_sessions.typing import SessionKey, SessionModel
 
 
-class SessionBackendInterface(Generic[SessionKey, SessionModel], metaclass=ABCMeta):
+class SessionBackendAbstract(Generic[SessionKey, SessionModel], metaclass=ABCMeta):
     """
     Abstract Interface for session backends.
     """
@@ -110,4 +110,4 @@ class SessionBackendInterface(Generic[SessionKey, SessionModel], metaclass=ABCMe
         raise NotImplementedError()
 
 
-__all__ = ["SessionBackendInterface", ]
+__all__ = ["SessionBackendAbstract", ]

@@ -3,10 +3,14 @@ Middleware for sessions management on the API.
 """
 
 import json
+from base64 import b64decode, b64encode
+from http.cookies import BaseCookie, SimpleCookie
 from typing import Optional, Type
 
+from starlette.datastructures import MutableHeaders
+from starlette.responses import Response
 from starlette.requests import HTTPConnection, HTTPException
-from starlette.types import ASGIApp, Receive, Scope, Send
+from starlette.types import ASGIApp, Receive, Scope, Send, Message
 
 from modular_sessions.errors import (
     SessionNotFound, SessionNotSet, VerificationException, BackendException
@@ -80,7 +84,21 @@ class SessionsMiddleware:
                     status_code=500, detail="Session ID could not be renewed."
                 ) from b
         scope["session"] = json.loads(session.json())
-        await self.app(scope, receive, send)
+
+        # borrowed from Starlette.SessionMiddleware for now
+        async def response_wrapper(message: Message) -> None:
+            if message["type"] == "http.response.start":
+                if scope["session"]:
+                    s_id = str(scope["session"]["session_id"])
+                    data = b64encode(s_id.encode("utf-8"))
+                    data = self.frontend.signer.sign(data)
+                    headers = MutableHeaders(scope=message)
+                    session_appendage = self.frontend.open_session(s_id)
+                    headers.append(session_appendage.output())
+
+            await send(message)
+
+        await self.app(scope, receive, response_wrapper)
 
     async def find_session_id(self, scope: Scope) -> Optional[str]:
         """

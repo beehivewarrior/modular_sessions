@@ -2,6 +2,7 @@
 Session Frontend that uses cookies.
 """
 
+from http.cookies import BaseCookie, SimpleCookie
 from typing import Optional
 
 from fastapi import HTTPException, Response
@@ -9,17 +10,18 @@ from fastapi.openapi.models import APIKey, APIKeyIn
 from itsdangerous import BadSignature, SignatureExpired, Signer, URLSafeTimedSerializer
 from starlette.requests import Request
 
-from modular_sessions.backends.meta import SessionBackendInterface
+from modular_sessions.backends.meta import SessionBackendAbstract
 from modular_sessions.errors import InvalidCookie, SessionNotSet
-from modular_sessions.frontends.meta import SessionFrontendInterface
+from modular_sessions.frontends.meta import SessionFrontendAbstract
 from modular_sessions.schemas import SessionCookieParameters
+from modular_sessions.typing import SessionAppendage
 
 
-class CookieSession(SessionFrontendInterface[str]):
+class CookieSession(SessionFrontendAbstract[str]):
 
     def __init__(self, *, cookie_name: str, identifier: str, secret_key: Optional[str] = None,
                  cookie_params: SessionCookieParameters = SessionCookieParameters(), scheme_name: Optional[str] = None,
-                 backend_class: SessionBackendInterface = None):
+                 backend_class: SessionBackendAbstract = None):
         """
         Session Frontend that uses cookies.
 
@@ -69,20 +71,21 @@ class CookieSession(SessionFrontendInterface[str]):
 
         return self.__identifier
 
-    def open_session(self, resp: Response, session_key: str) -> None:
+    def open_session(self, session_key: str) -> SessionAppendage:
         """
         Attach a session to a response.
 
-        :param resp:
         :param session_key:
         :return:
         """
 
-        resp.set_cookie(
-            key=self.model.name,
-            value=str(self.__serializer.dumps(session_key)),
-            **self.__cookie_params.dict(),
-        )
+        cookie: BaseCookie = SimpleCookie()
+        cookie[self.model.name] = str(self.__serializer.dumps(session_key))
+
+        for k, v in self.__cookie_params.dict().items():
+            cookie[self.model.name][k] = str(v)
+
+        return cookie
 
     def remove_session(self, resp: Response) -> None:
         """

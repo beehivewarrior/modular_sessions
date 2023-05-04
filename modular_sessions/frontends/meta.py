@@ -8,10 +8,10 @@ from typing import Generic
 from fastapi import Request, Response
 
 from modular_sessions.backends.memory import MemoryBackend
-from modular_sessions.typing import SessionKey
+from modular_sessions.typing import SessionKey, SessionAppendage
 
 
-class SessionFrontendInterface(Generic[SessionKey], metaclass=ABCMeta):
+class SessionFrontendAbstract(Generic[SessionKey], metaclass=ABCMeta):
     """
     Abstract Interface for session frontends.
     """
@@ -42,11 +42,10 @@ class SessionFrontendInterface(Generic[SessionKey], metaclass=ABCMeta):
             req.state.session_ids = {self.identifier: session_id}
 
     @abstractmethod
-    def open_session(self, resp: Response, session_key: SessionKey) -> None:
+    def open_session(self, session_key: SessionKey) -> SessionAppendage:
         """
         Attach a session to a response.
 
-        :param resp: Response.
         :param session_key: Session key.
         """
         raise NotImplementedError()
@@ -61,4 +60,4 @@ class SessionFrontendInterface(Generic[SessionKey], metaclass=ABCMeta):
         raise NotImplementedError()
 
 
-__all__ = ["SessionFrontendInterface", ]
+__all__ = ["SessionFrontendAbstract", ]

@@ -6,10 +6,10 @@ from typing import Optional, Type
 
 from modular_sessions.errors import SessionNotFound, SessionAlreadyExists
 from modular_sessions.typing import EngineType, SessionKey, SessionModel
-from .meta import SessionBackendInterface
+from .meta import SessionBackendAbstract
 
 
-class RedisHashSetBackend(SessionBackendInterface[SessionKey, SessionModel]):
+class RedisHashSetBackend(SessionBackendAbstract[SessionKey, SessionModel]):
     """
     Redis Backend for API Sessions.
 

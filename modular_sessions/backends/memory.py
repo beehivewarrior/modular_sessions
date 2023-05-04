@@ -8,10 +8,10 @@ from typing import Dict, Optional, Type, Union
 from modular_sessions.errors import SessionNotFound, SessionAlreadyExists
 from modular_sessions.typing import SessionKey, SessionModel
 
-from .meta import SessionBackendInterface
+from .meta import SessionBackendAbstract
 
 
-class MemoryBackend(SessionBackendInterface[SessionKey, SessionModel]):
+class MemoryBackend(SessionBackendAbstract[SessionKey, SessionModel]):
     """
     In-Memory Backend for API Sessions.
 
