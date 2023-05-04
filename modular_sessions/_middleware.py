@@ -4,11 +4,9 @@ Middleware for sessions management on the API.
 
 import json
 from base64 import b64decode, b64encode
-from http.cookies import BaseCookie, SimpleCookie
 from typing import Optional, Type
 
 from starlette.datastructures import MutableHeaders
-from starlette.responses import Response
 from starlette.requests import HTTPConnection, HTTPException
 from starlette.types import ASGIApp, Receive, Scope, Send, Message
 
@@ -93,8 +91,7 @@ class SessionsMiddleware:
                     data = b64encode(s_id.encode("utf-8"))
                     data = self.frontend.signer.sign(data)
                     headers = MutableHeaders(scope=message)
-                    session_appendage = self.frontend.open_session(s_id)
-                    headers.append(session_appendage.output())
+                    self.frontend.open_session(s_id, headers)
 
             await send(message)
 

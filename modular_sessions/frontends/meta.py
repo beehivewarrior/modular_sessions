@@ -6,6 +6,7 @@ from abc import ABCMeta, abstractmethod
 from typing import Generic
 
 from fastapi import Request, Response
+from starlette.datastructures import MutableHeaders
 
 from modular_sessions.backends.memory import MemoryBackend
 from modular_sessions.typing import SessionKey, SessionAppendage
@@ -42,11 +43,12 @@ class SessionFrontendAbstract(Generic[SessionKey], metaclass=ABCMeta):
             req.state.session_ids = {self.identifier: session_id}
 
     @abstractmethod
-    def open_session(self, session_key: SessionKey) -> SessionAppendage:
+    def open_session(self, session_key: SessionKey, headers: MutableHeaders) -> MutableHeaders:
         """
         Attach a session to a response.
 
         :param session_key: Session key.
+        :param headers: Headers to manipulate
         """
         raise NotImplementedError()
 

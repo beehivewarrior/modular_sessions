@@ -2,12 +2,13 @@
 Session Frontend that uses cookies.
 """
 
-from http.cookies import BaseCookie, SimpleCookie
+from http.cookies import BaseCookie, SimpleCookie, Morsel
 from typing import Optional
 
 from fastapi import HTTPException, Response
 from fastapi.openapi.models import APIKey, APIKeyIn
 from itsdangerous import BadSignature, SignatureExpired, Signer, URLSafeTimedSerializer
+from starlette.datastructures import MutableHeaders
 from starlette.requests import Request
 
 from modular_sessions.backends.meta import SessionBackendAbstract
@@ -71,11 +72,12 @@ class CookieSession(SessionFrontendAbstract[str]):
 
         return self.__identifier
 
-    def open_session(self, session_key: str) -> SessionAppendage:
+    def open_session(self, session_key: str, headers: MutableHeaders) -> MutableHeaders:
         """
         Attach a session to a response.
 
         :param session_key:
+        :param headers:
         :return:
         """
 
@@ -85,7 +87,10 @@ class CookieSession(SessionFrontendAbstract[str]):
         for k, v in self.__cookie_params.dict().items():
             cookie[self.model.name][k] = str(v)
 
-        return cookie
+        cookie_val = cookie.output(header="").strip()
+        headers.append("Set-Cookie", cookie_val)
+
+        return headers
 
     def remove_session(self, resp: Response) -> None:
         """

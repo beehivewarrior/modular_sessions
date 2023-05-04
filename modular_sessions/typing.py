@@ -2,11 +2,12 @@
 Type Hints for the Session Middleware.
 """
 
-from typing import Generic, Collection, Optional, Protocol, TypeVar, runtime_checkable
+from typing import Generic, Collection, Optional, Protocol, TypeVar, runtime_checkable, Iterable
 
 from aioredis.client import Redis
 from fastapi import Response
 from itsdangerous import Signer
+from starlette.datastructures import MutableHeaders
 from starlette.requests import Request as StarletteRequest
 from pydantic import BaseModel
 
@@ -20,7 +21,8 @@ SessionModel = TypeVar("SessionModel", bound=BaseModel)
 
 @runtime_checkable
 class SessionAppendage(Protocol):
-    def output(self, attrs: Optional[Collection], header: Optional[str], sep: Optional[str]) -> (str, str): ...
+    def output(self, attrs: Optional[Collection] = None, header: Optional[str] = None,
+               sep: Optional[str] = None) -> str: ...
 
 
 class BackEndInterface(Generic[SessionKey, SessionModel]):
@@ -39,7 +41,7 @@ class FrontEndInterface(Generic[SessionKey]):
     identifier: str
     signer: Signer
     def __call__(self, *args, **kwargs): ...
-    def open_session(self, session_key: SessionKey) -> SessionAppendage: ...
+    def open_session(self, session_key: SessionKey, headers: MutableHeaders) -> MutableHeaders: ...
     def remove_session(self, resp: Response) -> None: ...
 
 
